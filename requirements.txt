@@ -1,0 +1,8 @@
+# Experiments, scoring and figures
+matplotlib>=3.8
+numpy>=1.26
+
+# Video narration (video/demo/revoice.py). Optional: only needed to
+# re-render the presentation video from source.
+kokoro-onnx>=0.4
+onnxruntime>=1.17

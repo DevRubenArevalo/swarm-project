@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Tool/agent scratch directories
+.agents/
+.aws/
+.codex/
+
+# Internal ops notes — machine inventory, SSH config, host names.
+# Kept locally, not published.
+docs/HANDOFF.md
+
+# Run artifacts
+output/sweep.log
+output/*.log
+
+# Video build intermediates (frames, WAVs, per-slide clips)
+video/build/
+video/data/
+
+# Rendered video: large binaries. Only the final cut is tracked (see below).
+video/*.mp4
+!video/swarm_fidelity_demo_natural.mp4
+
+# Orphan caption files for cuts that are not the final video
+video/swarm_fidelity_3min.srt
+video/swarm_fidelity_demo_3min.srt
