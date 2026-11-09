@@ -55,9 +55,9 @@ BEATS = [
     )),
     (26, (
         "Then there were the blank answers. Where did they go?",
-        "The model used up its token budget while reasoning, so it stopped before returning a final answer.",
-        "We raised the cap from five hundred twelve to two thousand forty-eight. Look at the middle row.",
-        "The share of cutoffs fell from ninety-seven percent to thirteen.",
+        "The model used up its token budget while reasoning, and stopped before giving an answer.",
+        "We raised the cap from five hundred twelve to two thousand forty-eight.",
+        "On the same task, same prompt, same thirty agents, correctness went from ten percent to ninety-three.",
     )),
     (31, (
         "One wrinkle.",
@@ -106,7 +106,26 @@ def original_starts():
     }
 
 
+def use_system_espeak():
+    """Prefer a system espeak-ng.
+
+    The espeakng_loader wheel ships a libespeak-ng.so with its build-time data
+    directory compiled in, so it looks for phontab under a path that only
+    existed on the machine that built the wheel. Pointing the loader at a
+    system install avoids that.
+    """
+    import espeakng_loader
+
+    for lib, data in (("/usr/lib64/libespeak-ng.so.1", "/usr/share/espeak-ng-data"),
+                      ("/usr/lib/x86_64-linux-gnu/libespeak-ng.so.1", "/usr/share/espeak-ng-data")):
+        if Path(lib).exists() and (Path(data) / "phontab").is_file():
+            espeakng_loader.get_library_path = lambda value=lib: value
+            espeakng_loader.get_data_path = lambda value=data: value
+            return
+
+
 def load_engine(root):
+    use_system_espeak()
     options = ort.SessionOptions()
     options.intra_op_num_threads = 4
     model = ort.InferenceSession(

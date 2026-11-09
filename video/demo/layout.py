@@ -54,7 +54,9 @@ pre{margin:15px 0 0;font-size:31px;line-height:1.42;white-space:pre-wrap}
 .cells{display:grid;grid-template-columns:repeat(9,1fr);gap:10px;margin-top:22px}
 .cell{border-radius:9px;background:#e7eeeb;padding:12px;text-align:center;font-size:20px;color:#405a5d}
 .cell b{display:block;font-size:35px;color:#152a2d}.cell.focus{background:#cce9df}
-.compare{display:grid;grid-template-columns:160px 1fr 1fr;gap:15px 20px;align-items:center;font-size:23px}
+.compare{display:grid;grid-template-columns:186px 1fr 1fr;gap:17px 20px;align-items:center;font-size:23px}
+.compare.wide{grid-template-columns:230px 1fr 1fr;gap:22px 26px}
+.compare.wide .bar{height:56px}.compare.wide .bar b{top:14px}
 .compare strong{font-size:25px}
 .bar{position:relative;background:#e7eeeb;border-radius:8px;height:43px;overflow:hidden}
 .bar i{display:block;height:100%;background:#82c5b3}.bar.red i{background:#e7a794}
@@ -158,13 +160,22 @@ def visual(key, step):
                     card("Benchmark server · 64 slots enabled", '<div class="big">7.94 s</div>' + parallel + '<p>Requests overlap.</p>', show(step, 1))) + strip(
                     "Measured wall-clock for eight requests. Slots are illustrated.")
     if key == "budget":
-        rows = []
+        # Lead with correctness: it is the single-variable control the paper
+        # leads on (REPORT.md 4.1). Truncation follows, as the mechanism.
+        correct, lo, hi = [], [], []
         for model, label in zip(MODELS, LABELS):
             low, high = sorted((r for r in CONTROLS if r["control"].startswith("A") and r["model"] == model), key=lambda r: r["max_tokens"])
-            rows.append(f'<strong>{label}</strong>{bar(low["truncated_rate"], True)}{bar(high["truncated_rate"])}')
-        return card("Control A · share of responses cut off at the token limit",
-                    '<div class="compare"><span></span><strong>512 tokens</strong><strong>2,048 tokens</strong>' +
-                    "".join(rows) + '</div>') + strip('Log <span class="mono">done_reason: length</span>', 'Report truncation separately from answer correctness')
+            correct.append(f'<strong>{label}</strong>{bar(low["correctness_rate"], True)}{bar(high["correctness_rate"])}')
+            lo.append(f'{low["truncated_rate"]:.0%}')
+            hi.append(f'{high["truncated_rate"]:.0%}')
+        return grid(stat("10% → 93%", "Qwen 4B on an identical task. Same prompt, same 30-agent swarm.",
+                         "Only the token budget changed", "dark"),
+                    card("Control A · measured correctness",
+                         '<div class="compare wide"><span></span><strong>512 tokens</strong>'
+                         '<strong>2,048 tokens</strong>' + "".join(correct) + '</div>')) + strip(
+                    f'Cut off at 512 tokens · {" · ".join(lo)}', f'At 2,048 · {" · ".join(hi)}',
+                    'Log <span class="mono">done_reason: length</span>')
+
     if key == "control":
         return grid(card("Original · index follows agent ID", '<pre>Agent  8 → index  8\nAgent 18 → index 18\nAgent 59 → index 59</pre>'),
                     card("Control C · repeat the range 0–9", '<pre>Agent  8 → index 8\nAgent 18 → index 8\nAgent 59 → index 9</pre>', show(step, 1))) + strip(

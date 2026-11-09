@@ -15,24 +15,37 @@ to a row in `output/`.
 
 | # | Slide | Carries |
 |---|---|---|
-| 1 | Title | testbed, models, swarm sizes |
-| 2 | The setup | 3 models · 5–60 agents · 1 Spark · 4 controls |
-| 3 | The first result | the false collapse, 4B 40%→8%, 14B 80%→7% |
-| 4 | The reversal | the claim retracted |
-| 5 | Four artifacts | each bug + its negative control |
-| 6 | Artifact 1 | concurrency 1.01 (queue) vs 7.18 (parallel) |
-| 7 | Artifact 3 | truncation 90/97/83% at 512 → 7/13/17% at 2048 |
-| 8 | The corrected result | flat curve; 0 of 480 sycophancy |
-| 9 | Residual errors | 6 errors, all prime index 8, 12.5% on that item |
-| 10 | Concurrency ceiling | 35.2 / 36.5 / 9.5 at N=60 |
-| 11 | What it proves | the four rules |
+| 1 | The drop | the false collapse, 40% → 8% |
+| 2 | Set up a run | 3 models · 5–60 requests · one DGX Spark |
+| 3 | Follow agent 8 | one prompt with an independently checkable answer |
+| 4 | Check the score | format check passes, answer check fails (19 vs 23) |
+| 5 | Check the server | 27.37 s serial vs 7.94 s parallel, same 8 requests |
+| 6 | **A budget limit, not a model limit** | **Control A: correctness 10% → 93%**, cutoffs 90/97/83% → 7/13/17% |
+| 7 | Change one variable | Control C index cycling |
+| 8 | Read the dashboard | the corrected curve; the steep drop is gone |
+| 9 | Inspect the misses | 6 misses, all prime index 8 |
+| 10 | Run a separate probe | 0 of 480 copied the planted answer |
+| 11 | Take it into your next run | the four checks |
+
+Slide 6 carries the paper's lead evidence (`docs/REPORT.md` §4.1): the
+single-variable control in which only the per-agent token budget changes.
 
 ## Rebuild
 
 ```bash
+# Original deck (flite narration)
 python3 video/build.py            # full build
 python3 video/build.py --frames   # slides only, for visual review
+
+# Revised cut — the one that ships. Renders the picture, then the voice.
+python3 video/demo/build.py --voice /path/to/piper-voice.onnx
+python3 video/demo/revoice.py /path/to/kokoro-model-dir   # voice: af_heart @ 0.98
 ```
+
+`revoice.py` re-narrates against the existing picture cuts, so editing a line
+in its `BEATS` table and re-running it changes the narration and captions
+without touching the slides. It fits each beat into the window its scene
+already occupies and fails loudly if a line cannot fit.
 
 Timing is **measured, not guessed**: `build.py` synthesizes each line, reads the
 real duration back with `ffprobe`, then scales the inter-slide pauses so the
