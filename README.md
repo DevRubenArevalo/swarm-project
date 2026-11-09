@@ -90,7 +90,9 @@ inference server you have proven is actually parallel.
 ## Repository
 
 ```
-docs/REPORT.md        research report (the submission)
+docs/swarm_fidelity_report.pdf   SUBMISSION: 7-page report on the Apart template
+docs/swarm_fidelity_report.docx  editable source for that PDF
+docs/REPORT.md        long-form report (fuller than the 7-page PDF)
 docs/progress.md      full investigation log, including the retractions
 docs/VIDEO_SCRIPT.md  3-minute video script + shot list
 

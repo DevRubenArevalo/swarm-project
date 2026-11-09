@@ -32,3 +32,7 @@ video/swarm_fidelity_demo_3min.srt
 
 # PDF build intermediate
 docs/swarm_fidelity_report.html
+
+# Long-form reading PDF built from REPORT.md (not the submission)
+docs/REPORT_full.pdf
+docs/REPORT_full.html

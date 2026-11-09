@@ -1,10 +1,14 @@
-"""Render docs/REPORT.md to a print-ready PDF via markdown-it + Chrome."""
+"""Render docs/REPORT.md to a long-form reading PDF.
+
+This is NOT the submission artifact. The submission is the Apart-template
+document at docs/swarm_fidelity_report.pdf (editable source: .docx).
+"""
 import base64, mimetypes, pathlib, subprocess, sys
 from markdown_it import MarkdownIt
 
 ROOT = pathlib.Path(sys.argv[1] if len(sys.argv)>1 else ".").resolve()
 SRC  = ROOT / "docs" / "REPORT.md"
-OUT  = pathlib.Path(sys.argv[2] if len(sys.argv)>2 else "docs/swarm_fidelity_report.pdf").resolve()
+OUT  = pathlib.Path(sys.argv[2] if len(sys.argv)>2 else "docs/REPORT_full.pdf").resolve()
 
 md = MarkdownIt("commonmark").enable("table").enable("strikethrough")
 html = md.render(SRC.read_text())
