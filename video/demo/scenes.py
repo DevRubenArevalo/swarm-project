@@ -1,0 +1,26 @@
+"""Narration and visuals for the three-minute demonstration."""
+
+SCENES = [
+    ("The drop", "Would you trust this curve?",
+     "Imagine you launch sixty AI agents. Their accuracy drops from forty percent to eight. Would you switch models? We almost drew that conclusion. Then we checked what the benchmark was actually measuring.", "drop"),
+    ("Set up a run", "Start with three choices",
+     "Pick a model, a task, and a group size. We used three local models on one DGX Spark, with five to sixty requests per run. Each agent gets its own prompt. The server sends back an answer, and the runner saves what happened. Let's follow one.", "setup"),
+    ("Follow agent 8", "One prompt, one checkable answer",
+     "Agent eight gets this prompt. Find the prime at index eight, counting from zero. Follow the sequence on screen. The answer is twenty-three. Now watch what happens if the model returns nineteen.", "prompt"),
+    ("Check the score", "A tidy answer can still be wrong",
+     "The line has the right shape and the right agent number. The old check would pass it. The corrected scorer compares nineteen with twenty-three. That gives us a wrong answer we can trace back to a specific task. Try this deliberate miss before you trust an automated score.", "score"),
+    ("Check the server", "Eight requests can still form a queue",
+     "Next, we launch eight requests. The original server handles one at a time. With parallel slots enabled, the same batch drops from twenty-seven seconds to about eight. Submitting requests together tells us when they arrived. This timing check tells us whether the server did work in parallel.", "queue"),
+    ("Check the output", "Where did the answers go?",
+     "Some responses were blank. The model spent its token allowance reasoning and hit the cap before giving a final answer. Raising the budget from five hundred twelve to two thousand forty-eight cut truncation sharply across all three models. Look at the nine-billion-parameter model. The cutoff rate went from ninety-seven percent to thirteen.", "budget"),
+    ("Change one variable", "Keep the range of tasks bounded",
+     "There's one more catch. In the original run, larger groups got higher prime indices. We cycle through indices zero to nine instead. Agent eighteen gets the same index as agent eight. Small groups can still see a different mix of items.", "control"),
+    ("Read the dashboard", "The steep drop disappears",
+     "Here's the rerun. Both smaller models got every item right at all five group sizes. The fourteen-billion-parameter model scored at least ninety-eight point five percent. We saw no sharp accuracy break through sixty requests on this task.", "results"),
+    ("Inspect the misses", "Six misses point to one item",
+     "Zoom in on the largest model. All six misses asked for index eight. Each time it said nineteen, the prime one position earlier. We saw that pattern at fifty and sixty requests. A five-request run never sees that item. That's why we keep the item-level records alongside the averages.", "misses"),
+    ("Run a separate probe", "Would agents copy a planted answer?",
+     "In a separate test, we planted a wrong answer in a leader message. Across four hundred eighty responses, none copied that answer. That's the observed result for this particular probe.", "lure"),
+    ("Take it into your next run", "Four checks before you trust a curve",
+     "If your accuracy curve drops, start here. Verify overlapping requests. Score the answer itself. Log when the model hits its token limit. And compare the same mix of tasks. The paper and dashboard show the measurements behind each check.", "close"),
+]

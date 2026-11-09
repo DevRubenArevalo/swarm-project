@@ -1,0 +1,164 @@
+1
+00:00:00,100 --> 00:00:04,729
+Forty percent to eight. If your benchmark dropped
+that far, would you switch models?
+
+2
+00:00:05,199 --> 00:00:11,770
+That was the story our first chart told. But
+before we blamed the model, we followed one
+answer through the test.
+
+3
+00:00:14,000 --> 00:00:20,485
+Here's the setup. On one D G X Spark, we picked a
+local model and gave each agent a small job.
+
+4
+00:00:20,955 --> 00:00:29,510
+Then we changed how many requests we sent, from
+five to sixty. We can check every answer against
+a known value. Let's follow one request.
+
+5
+00:00:30,833 --> 00:00:35,953
+Agent eight has a simple job. Find the prime at
+index eight, starting from zero.
+
+6
+00:00:36,333 --> 00:00:39,960
+Count along the row. At index eight, you land on
+twenty-three.
+
+7
+00:00:40,430 --> 00:00:42,841
+Now suppose the agent sends back nineteen.
+
+8
+00:00:44,533 --> 00:00:48,565
+At a glance, that line looks fine. Right agent
+number, right format.
+
+9
+00:00:49,633 --> 00:00:53,068
+Here's the catch. Nineteen is the prime one slot
+earlier.
+
+10
+00:00:53,538 --> 00:01:00,450
+The format check passes, but the answer check
+fails. Feed that exact line to your scorer and
+see which check it runs.
+
+11
+00:01:01,167 --> 00:01:05,839
+Next we sent eight requests together. The server
+quietly queued them, one at a time.
+
+12
+00:01:06,233 --> 00:01:11,076
+With parallel slots turned on, that batch went
+from about twenty-seven seconds to eight.
+
+13
+00:01:11,302 --> 00:01:19,217
+Same number of requests. Very different overlap.
+That's why we check what the server actually did
+before we interpret the accuracy curve.
+
+14
+00:01:19,633 --> 00:01:22,300
+Then there were the blank answers. Where did they
+go?
+
+15
+00:01:22,770 --> 00:01:28,551
+The model used up its token budget while
+reasoning, so it stopped before returning a final
+answer.
+
+16
+00:01:29,021 --> 00:01:34,312
+We raised the cap from five hundred twelve to two
+thousand forty-eight. Look at the middle row.
+
+17
+00:01:34,782 --> 00:01:38,110
+The share of cutoffs fell from ninety-seven
+percent to thirteen.
+
+18
+00:01:39,767 --> 00:01:40,727
+One wrinkle.
+
+19
+00:01:41,267 --> 00:01:46,643
+The bigger groups were getting harder questions.
+So we cycled through indices zero to nine.
+
+20
+00:01:47,113 --> 00:01:52,894
+Now agents eight and eighteen both get index
+eight. Smaller groups can still see a different
+mix.
+
+21
+00:01:55,367 --> 00:01:59,889
+Look what happened when we reran it. The steep
+drop on that first chart disappeared.
+
+22
+00:02:01,033 --> 00:02:07,156
+Both Qwen models got every answer right. Deep
+Seek stayed at ninety-eight point five percent or
+above.
+
+23
+00:02:07,626 --> 00:02:10,079
+That held through sixty requests on this task.
+
+24
+00:02:10,867 --> 00:02:16,179
+The remaining misses tell their own story. There
+were six, and every one asked for index eight.
+
+25
+00:02:16,599 --> 00:02:19,884
+Each time Deep Seek said nineteen instead of
+twenty-three.
+
+26
+00:02:20,304 --> 00:02:29,456
+A group of five never gets that item. A group of
+sixty sees it six times. You can see why the
+individual answers matter as much as the average.
+
+27
+00:02:30,067 --> 00:02:33,587
+We also tried planting a wrong answer in a leader
+message.
+
+28
+00:02:34,057 --> 00:02:39,625
+None of the four hundred eighty responses
+repeated it. That's the result of this particular
+test.
+
+29
+00:02:42,100 --> 00:02:46,324
+If your curve falls like ours did, check four
+things before you switch models.
+
+30
+00:02:46,794 --> 00:02:50,463
+Are the requests overlapping? Does the scorer
+catch a wrong answer?
+
+31
+00:02:50,933 --> 00:02:55,243
+Did the model hit its token limit? Are you
+comparing the same mix of tasks?
+
+32
+00:02:55,713 --> 00:02:58,166
+The paper and dashboard walk through all four.
