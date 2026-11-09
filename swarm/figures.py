@@ -27,6 +27,29 @@ from matplotlib.ticker import FuncFormatter
 
 OUTPUT_DIR = "output"
 
+
+def _use_report_font() -> str:
+    """Match the report's typeface so the figures are not an island of sans.
+
+    The report is set in Latin Modern Roman (OpenType Computer Modern). Where
+    it is unavailable -- a bare CI runner, for instance -- matplotlib walks
+    the rest of the stack rather than failing: the figures still carry the
+    same data, drawn in whatever serif exists.
+    """
+    stack = ["Latin Modern Roman", "CMU Serif", "Nimbus Roman",
+             "Liberation Serif", "Times New Roman", "DejaVu Serif"]
+    plt.rcParams.update({
+        "font.family": "serif",
+        "font.serif": stack,
+        "mathtext.fontset": "cm",
+        "axes.unicode_minus": False,
+    })
+    available = {f.name for f in matplotlib.font_manager.fontManager.ttflist}
+    return next((name for name in stack if name in available), "matplotlib default serif")
+
+
+FONT = _use_report_font()
+
 # --- validated palette (light mode) ----------------------------------------
 SURFACE = "#fcfcfb"
 INK = "#0b0b0b"
