@@ -18,8 +18,10 @@ budget moves:
 
 | Model | correctness @ 512 tok | @ 2048 tok |
 |---|---|---|
-| qwen3.5 4B | **0.10** | **0.93** |
-| qwen3.5 9B | 0.03 | 0.87 |
+| qwen3.5 4B | **0.10** [0.03, 0.26] | **0.93** [0.79, 0.98] |
+| qwen3.5 9B | 0.03 [0.01, 0.17] | 0.87 [0.70, 0.95] |
+
+Brackets are Wilson 95% intervals, n=30. The two intervals are disjoint.
 
 Nothing about the task changed. 83 points of apparent capability collapse were
 a property of one configuration value in our own code.
@@ -71,7 +73,7 @@ python3 -m swarm.verify
 ```
 
 ```
-All 35 claims verified against the committed data.
+All 42 claims verified against the committed data.
 ```
 
 It checks, among others, that `qwen3.5:4b` really does move from 0.10 to 0.93

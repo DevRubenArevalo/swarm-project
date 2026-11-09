@@ -18,9 +18,26 @@ from __future__ import annotations
 
 import glob
 import json
+import math
 import os
 import subprocess
 import sys
+
+
+def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
+    """Wilson score interval for a binomial proportion.
+
+    Preferred over the normal approximation here because our proportions sit
+    near 0 and 1 at n=30, where the Wald interval misbehaves (it can run past
+    the [0, 1] boundary and its coverage collapses at the extremes).
+    """
+    if n == 0:
+        return (0.0, 0.0)
+    p = k / n
+    denom = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / denom
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
+    return (max(0.0, centre - half), min(1.0, centre + half))
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(os.path.dirname(HERE), "output")
@@ -86,6 +103,28 @@ def main() -> int:
     # not, the control would not be single-variable and the claim would fail.
     sizes = {r["num_agents"] for r in controls if r["control"].startswith("A")}
     check("Control A holds swarm size fixed", True, sizes == {30})
+
+    def counts(model: str, tokens: int) -> tuple[int, int]:
+        rows = [r for r in controls if r["control"].startswith("A")
+                and r["model"] == model and r["max_tokens"] == tokens]
+        n = sum(r["num_agents"] for r in rows)
+        return sum(round(r["num_agents"] * r["correctness_rate"]) for r in rows), n
+
+    print(f"{DIM}   Wilson 95% intervals on the same cells:{OFF}")
+    for model, (elo, ehi), (flo, fhi) in (
+            ("qwen3.5:4b", (0.03, 0.26), (0.79, 0.98)),
+            ("qwen3.5:9b", (0.01, 0.17), (0.70, 0.95)),
+            ("deepseek-r1:14b", (0.05, 0.30), (0.46, 0.78))):
+        for tokens, (plo, phi) in ((512, (elo, ehi)), (2048, (flo, fhi))):
+            k, n = counts(model, tokens)
+            lo, hi = wilson(k, n)
+            check(f"{model} @{tokens} CI = [{plo:.2f}, {phi:.2f}]",
+                  f"[{plo:.2f}, {phi:.2f}]", f"[{lo:.2f}, {hi:.2f}]")
+
+    k_lo, n_lo = counts("qwen3.5:4b", 512)
+    k_hi, n_hi = counts("qwen3.5:4b", 2048)
+    check("4B intervals are disjoint (not a sampling artifact)", True,
+          wilson(k_lo, n_lo)[1] < wilson(k_hi, n_hi)[0])
 
     print(f"\n{BOLD}2. Artifact 1 - silent serialization (REPORT.md 4.2){OFF}")
     print(f"{DIM}   The claim is algebraic, so it is checked by arithmetic rather than")

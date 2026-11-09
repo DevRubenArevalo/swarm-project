@@ -146,9 +146,18 @@ Same task, same swarm, same model — the only change is the budget.
 
 | Model | correctness @512 | @2048 | truncated @512 | @2048 |
 |---|---|---|---|---|
-| qwen3.5:4b | 0.10 | **0.93** | 0.90 | 0.07 |
-| qwen3.5:9b | 0.03 | **0.87** | 0.97 | 0.13 |
-| deepseek-r1:14b | 0.13 | 0.63 | 0.83 | 0.17 |
+| qwen3.5:4b | 0.10 [0.03, 0.26] | **0.93** [0.79, 0.98] | 0.90 | 0.07 |
+| qwen3.5:9b | 0.03 [0.01, 0.17] | **0.87** [0.70, 0.95] | 0.97 | 0.13 |
+| deepseek-r1:14b | 0.13 [0.05, 0.30] | 0.63 [0.46, 0.78] | 0.83 | 0.17 |
+
+Brackets are Wilson 95% confidence intervals on the proportion, n=30 per cell.
+**The effect is not a sampling artifact:** for the 4B the two intervals are
+disjoint by a wide margin — the 512-token interval tops out at 0.26 and the
+2048-token interval starts at 0.79 — and the same holds for the 9B. We use
+Wilson rather than the normal approximation because these proportions sit near
+0 and 1 at n=30, where the Wald interval has poor coverage and can run past the
+[0, 1] boundary. Each cell is a single run of 30 agents, so the intervals
+describe sampling variation within a run, not run-to-run variation.
 
 ![Figure 2](../output/fig2_truncation.png)
 
@@ -476,7 +485,7 @@ no GPU and no inference server:
 
 ```bash
 pip install -r requirements.txt
-python3 -m swarm.verify     # 35 claims recomputed from output/*.json
+python3 -m swarm.verify     # 42 claims recomputed from output/*.json
 ```
 
 That checks the chain from data to claim. Re-running the measurements
@@ -533,6 +542,6 @@ python3 -m swarm.slots --watch
 | `swarm/guard.py` | Instance-labelled GPU residency recording |
 | `swarm/slots.py` | Live llama.cpp slot inspector |
 | `swarm/figures.py` | Report figures |
-| `swarm/verify.py` | Re-derives all 35 reported claims from `output/` with no GPU |
+| `swarm/verify.py` | Re-derives all 42 reported claims from `output/` with no GPU |
 | `output/e1_*.json`, `e4_*.json`, `controls_*.json` | Raw results |
 | `docs/progress.md` | Full investigation log, including the retractions |
