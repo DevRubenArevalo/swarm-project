@@ -57,6 +57,36 @@ this design could not have produced one — not that local-model swarms are
 robust. The coordination experiment this harness makes possible is set out in
 REPORT.md §5.3.
 
+## Verify this yourself
+
+Every number in the report is re-derived from the committed raw data by one
+command. **No GPU, no inference server, no network** — the results are in
+`output/*.json` and the check recomputes the paper's claims from them.
+
+```bash
+git clone https://github.com/DevRubenArevalo/swarm-project
+cd swarm-project
+pip install -r requirements.txt
+python3 -m swarm.verify
+```
+
+```
+All 35 claims verified against the committed data.
+```
+
+It checks, among others, that `qwen3.5:4b` really does move from 0.10 to 0.93
+when only the token budget changes; that the two standard parallelism metrics
+score a perfectly serial queue *identically* to a perfectly parallel one while
+`achieved_concurrency` separates them; that the scorer now rejects a
+well-formed wrong answer; and that the three report figures regenerate
+byte-identically from the JSON. It exits non-zero if any claim fails.
+
+**What that does and does not prove.** It proves the chain from data to claim:
+the paper's numbers are the numbers in the files, and the corrected scorer
+behaves as described. It does not re-run inference. To reproduce the
+*measurements*, you need the hardware path below — three local models and an
+inference server you have proven is actually parallel.
+
 ## Repository
 
 ```
@@ -71,6 +101,7 @@ swarm/guard.py        instance-labelled GPU residency recording
 swarm/slots.py        live llama.cpp slot inspector
 swarm/experiments.py  E1-E4 orchestration
 swarm/figures.py      report figures
+swarm/verify.py       re-derives every claim in the report from output/ (no GPU)
 swarm/tasks.py        the 4-task suite
 
 output/               results (JSON) and the 3 report figures (PNG)
@@ -94,7 +125,10 @@ No host names or keys are baked into the code. Every endpoint reads from the
 environment (`SWARM_OLLAMA_URL`, `SWARM_SHARED_OLLAMA_URL`, `SWARM_SSH_TARGET`)
 and defaults to `localhost`.
 
-## Reproduction
+## Reproduction (re-running the measurements)
+
+This needs the hardware: three local models and a GPU. `swarm.verify` above
+covers the data-to-claim chain without any of it.
 
 ```bash
 # 1. An inference server that actually runs agents in parallel.

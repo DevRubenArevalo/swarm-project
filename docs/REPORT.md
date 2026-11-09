@@ -2,57 +2,43 @@
 
 ### The break point was in the instrument, not the models
 
-**Swarm Alignment Hackathon 2026 — AI Alignment Foundation**
-Tracks: 1 (sandboxes & testbeds), 2 (science of agent networks), 4 (oversight)
-Testbed: NVIDIA DGX Spark (Blackwell GB10, 128 GB unified memory) · Ollama 0.40.15
+**Ruben Arevalo** — Independent Researcher
+
+**Swarm Alignment Hackathon 2026** · Apart Research / AI Alignment Foundation · Track 1: Sandboxes & testbeds
+
+Testbed: NVIDIA DGX Spark (Blackwell GB10, 128 GB unified) · Ollama 0.40.15
+
+Code and data: github.com/DevRubenArevalo/swarm-project
+
+*All code and results were produced during the sprint, 7–8 November 2026. No preexisting code was used.*
 
 ---
 
 ## 1. Abstract
 
 We set out to find the swarm size at which small local models (4B–14B) stop
-behaving like a frontier agent. We did not find one. The more important result
-is that **our first harness reported one — confidently, plausibly, and
-falsely.**
+behaving like reliable agents. We did not find one. The more important result is
+that our first harness reported one — confidently, plausibly, and falsely.
 
 The cleanest evidence is a single-variable control. Holding the model, the
 prompt, the task and the swarm size (30 agents) fixed, and changing *only* the
 per-agent token budget from 512 to 2048, measured correctness on `qwen3.5:4b`
-moves from **0.10 to 0.93**; on `qwen3.5:9b`, from **0.03 to 0.87**. Nothing
-about the task changed. Eighty-three points of apparent capability collapse
-were a property of one configuration value in our own harness.
+moves from **0.10 to 0.93**; on `qwen3.5:9b`, from 0.03 to 0.87. Nothing about
+the task changed. Eighty-three points of apparent capability collapse were a
+property of one configuration value in our own harness.
 
-That is one of **four distinct artifacts** we identify, each independently
-sufficient to produce a convincing but false break-point curve, and each
-reproduced with a negative control:
+That is one of **four distinct measurement artifacts** we identify, each
+independently sufficient to produce a convincing but false break-point curve
+and each caught by a negative control: silent serialization of the inference
+server, format-only scoring, token truncation inside a hidden reasoning field,
+and per-agent difficulty confounded with swarm size. Two standard parallelism
+metrics are algebraically incapable of detecting the first.
 
-1. **Silent serialization.** The default inference server ran one request at a
-   time, so a "swarm of 60" was a queue of 60. Both standard parallelism
-   metrics report *perfect parallelism* for a fully serial queue.
-2. **Format-only scoring.** The correctness check validated response shape, not
-   content, so a confidently wrong answer scored 1.0 — and the sycophancy
-   experiment could not detect sycophancy at all.
-3. **Token truncation.** At a 512-token budget, 83–97% of agents exhausted
-   their budget inside a hidden `thinking` field and returned an empty string,
-   which scored as model failure rather than as a measurement cutoff.
-4. **Difficulty confounded with swarm size.** Our coordination task gave agent
-   *k* a subtask of difficulty proportional to *k*, so increasing the swarm
-   size also increased the mean per-agent difficulty.
-
-Removing all four, the collapse disappears: correctness is 1.00 from 5 to 60
+With all four removed the collapse disappears: correctness is 1.00 from 5 to 60
 agents for the 4B and 9B and 0.985–1.00 for the 14B, and 0 of 480 agents copied
-an injected wrong answer. We read that null **narrowly** (§5.1, §6): our agents
-do not communicate, so this design has no mechanism by which swarm size could
-degrade per-agent fidelity, and the null is close to a property of the design
-rather than a discovery about models.
-
-Our claim is therefore about instrumentation, not about model capability.
-Three of the four artifacts produce curves that *look like alignment findings* —
-degradation with scale, a capability cliff, a size-dependent instruction-following
-deficit — and all three are infrastructure. The two standard parallelism metrics
-are algebraically incapable of detecting the first. We argue that published
-local-model swarm results are at elevated risk of these artifacts, and we release
-the harness, the controls, and the negative-control procedure that catches them.
+an injected wrong answer. We read that null narrowly: our agents never read one
+another's output, so this design has no mechanism by which swarm size could
+degrade fidelity. Our claim concerns instrumentation, not model capability.
 
 ---
 
@@ -164,7 +150,9 @@ Same task, same swarm, same model — the only change is the budget.
 | qwen3.5:9b | 0.03 | **0.87** | 0.97 | 0.13 |
 | deepseek-r1:14b | 0.13 | 0.63 | 0.83 | 0.17 |
 
-> **Figure 2** — `output/fig2_truncation.png`
+![Figure 2](../output/fig2_truncation.png)
+
+*Figure 2.*
 
 **A fixed token budget biases against the model that reasons more.** At 2048
 tokens the 4B used ~1894 thinking characters and the 9B ~2668; at a fixed 512
@@ -205,7 +193,9 @@ With `OLLAMA_NUM_PARALLEL=64`, the same test gives achieved concurrency
 1.00 / 1.60 / 3.21 / 7.18 at N = 1/2/4/8, and N=8 wall-clock drops from
 27.37 s to 7.94 s.
 
-> **Figure 3** — `output/fig3_concurrency_ceiling.png`
+![Figure 3](../output/fig3_concurrency_ceiling.png)
+
+*Figure 3.*
 
 Effective concurrency at N=60: **4B 35.2, 9B 36.5, 14B 9.5**. The 14B plateaus
 near 10 and takes 136.6 s where the 4B takes 53.9 s. *Model size caps real
@@ -277,7 +267,9 @@ to that item. These runs showed no sharp accuracy break through 60 requests.
 The changing item mix limits what we can infer about smaller effects of swarm
 size.
 
-> **Figure 1** — `output/fig1_fidelity_curve.png`
+![Figure 1](../output/fig1_fidelity_curve.png)
+
+*Figure 1.*
 
 ### 4.5 What the corrected experiments show
 
@@ -393,7 +385,9 @@ for all three, which is what this paper contributes.
 
 ---
 
-## 6. Limitations
+## 6. Limitations, Dual-Use and Ethical Considerations
+
+### 6.1 Limitations
 
 - **Single testbed, single inference stack.** All findings are on one DGX
   Spark with Ollama/llama.cpp. The serialization artifact in particular is a
@@ -431,9 +425,62 @@ for all three, which is what this paper contributes.
 - **The off-by-one analysis is correlational.** We infer 1-indexed reading from
   the answer pattern; we did not inspect the models' reasoning traces.
 
+### 6.2 What this work does and does not establish
+
+**It establishes** that four specific, ordinary bugs in a measurement harness
+can each independently produce a curve that looks like a model capability
+cliff, and that one of them moved a measured accuracy from 0.10 to 0.93 with
+the model, prompt, task and swarm size held fixed. It establishes that two
+widely used parallelism metrics cannot distinguish perfect parallelism from a
+fully serial queue.
+
+**It does not establish** that local-model swarms are robust. Our agents never
+read one another's output, so the design cannot exhibit error propagation or
+conformity to a wrong peer — the two failure modes that matter most for swarm
+alignment. The null is close to a property of the design (§6.1). Nor does it
+establish how common these artifacts are in published work; §5.1 states that as
+an open question our controls make testable, not as a finding.
+
+### 6.3 Dual-use considerations
+
+The contribution is a measurement instrument, which cuts both ways.
+
+**Capability uplift.** We show that a 4B model sustains ~35 effectively
+concurrent agents at full accuracy on short tasks, and that naive harnesses
+*understate* small-model swarm performance. That lowers the perceived cost of
+running large agent populations on consumer hardware, outside any API provider's
+logging, rate limiting or moderation. Our harness is a convenience for anyone
+building such a population, including for purposes we would not endorse. We
+judge the uplift modest — the concurrency settings we document (`-np`,
+`OLLAMA_NUM_PARALLEL`) are vendor-documented, and the result that bigger models
+cap throughput is not actionable for misuse — but it is not zero.
+
+**The sycophancy probe is symmetric.** A harness built to detect whether agents
+copy an injected wrong answer is, run in reverse, a harness for finding prompts
+that make them copy it. We report a null (0 / 480) on a deliberately obvious
+lure; we do not publish lures tuned to succeed.
+
+**Why we judge release net-positive.** Oversight cannot monitor what it cannot
+measure. If swarm benchmarks silently misreport by 83 points, both safety claims
+and risk claims built on them are unreliable in an unknown direction. The
+negative controls here are cheap, fast and have defined failure signatures; they
+make existing results auditable. We release no model weights, no jailbreaks and
+no novel attack, only measurement code and the data it produced.
+
 ---
 
-## 7. Reproduction
+## Appendix A. Reproduction
+
+Every number in this report can be re-derived from the committed raw data with
+no GPU and no inference server:
+
+```bash
+pip install -r requirements.txt
+python3 -m swarm.verify     # 35 claims recomputed from output/*.json
+```
+
+That checks the chain from data to claim. Re-running the measurements
+themselves needs the hardware:
 
 ```bash
 # 1. Start an inference server that actually runs agents in parallel.
@@ -476,7 +523,7 @@ python3 -m swarm.slots --watch
 4. Hold per-agent difficulty constant when varying swarm size.
 5. Record GPU residency per row, labelled by server instance.
 
-### Artifacts
+## Appendix B. Code and data artifacts
 
 | File | Contents |
 |---|---|
@@ -486,5 +533,6 @@ python3 -m swarm.slots --watch
 | `swarm/guard.py` | Instance-labelled GPU residency recording |
 | `swarm/slots.py` | Live llama.cpp slot inspector |
 | `swarm/figures.py` | Report figures |
+| `swarm/verify.py` | Re-derives all 35 reported claims from `output/` with no GPU |
 | `output/e1_*.json`, `e4_*.json`, `controls_*.json` | Raw results |
 | `docs/progress.md` | Full investigation log, including the retractions |

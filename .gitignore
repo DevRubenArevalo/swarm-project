@@ -29,3 +29,6 @@ video/*.mp4
 # Orphan caption files for cuts that are not the final video
 video/swarm_fidelity_3min.srt
 video/swarm_fidelity_demo_3min.srt
+
+# PDF build intermediate
+docs/swarm_fidelity_report.html
