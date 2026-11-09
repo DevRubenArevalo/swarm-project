@@ -128,7 +128,7 @@ def main():
             "-i", playlist, "-i", subtitles, "-map", "0:v", "-map", "0:a", "-map", "1:s",
             "-vf", f"setpts=N/({FPS}*TB)", "-r", FPS,
             "-c:v", "libx264", "-threads", "4", "-preset", "veryfast", "-crf", "18",
-            "-af", "loudnorm=I=-16:TP=-1.5:LRA=7,aresample=48000,apad",
+            "-af", "loudnorm=I=-16:TP=-1.5:LRA=7,aresample=48000,pan=stereo|c0=c0|c1=c0,apad",
             "-c:a", "aac", "-b:a", "160k", "-c:s", "mov_text", "-metadata:s:s:0",
             "language=eng", "-disposition:s:0", "0", "-t", TARGET, "-movflags", "+faststart",
             OUT / f"{STEM}.mp4")

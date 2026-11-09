@@ -1,7 +1,12 @@
 # 3-minute presentation video
 
 **Final cut:** `swarm_fidelity_demo_natural.mp4` — 1920×1080, 30 fps,
-**180.00 s**, 5.7 MB. Captions: `swarm_fidelity_demo_natural.srt`.
+**180.00 s**, 5.7 MB, AAC stereo. Captions: `swarm_fidelity_demo_natural.srt`.
+
+The narration is synthesized as a single channel and duplicated into both, with
+`pan=stereo|c0=c0|c1=c0` rather than `-ac 2`: the latter applies pan-law
+attenuation and would drop the track ~3 dB below the loudnorm target. A mono
+track plays out of the left ear only in VLC and some other players.
 
 Two renderers live here. `build.py` + `slides.py` + `narration.py` is the
 original deck (stills in `slides/`); `demo/` is the revised cut that produced

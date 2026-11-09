@@ -199,7 +199,7 @@ def main():
             "-i", str(OUT / f"{ORIGINAL}.mp4"), "-i", str(audio), "-i", str(subs),
             "-map", "0:v:0", "-map", "1:a:0", "-map", "2:s:0",
             "-c:v", "copy", "-c:a", "aac", "-b:a", "160k",
-            "-af", "loudnorm=I=-16:TP=-1.5:LRA=7,aresample=48000",
+            "-af", "loudnorm=I=-16:TP=-1.5:LRA=7,aresample=48000,pan=stereo|c0=c0|c1=c0",
             "-c:s", "mov_text", "-metadata:s:s:0", "language=eng",
             "-disposition:s:0", "0", "-t", "180", "-movflags", "+faststart",
             str(OUT / f"{NEW}.mp4"),
