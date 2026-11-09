@@ -1,0 +1,200 @@
+[
+  {
+    "control": "A original prompt @512tok",
+    "model": "deepseek-r1:14b",
+    "num_agents": 30,
+    "max_tokens": 512,
+    "completion_rate": 1.0,
+    "format_rate": 0.1667,
+    "correctness_rate": 0.1333,
+    "truncated_rate": 0.8333,
+    "empty_response_rate": 0.8333,
+    "off_by_one_count": 1,
+    "mean_thinking_chars": 1316.4,
+    "achieved_concurrency": 17.97,
+    "total_time_s": 62.69,
+    "co_resident": [
+      "bench/qwen3.5:9b"
+    ],
+    "wrong_answers": [
+      {
+        "agent": 10,
+        "got": 29,
+        "want": 31
+      }
+    ]
+  },
+  {
+    "control": "A original prompt @2048tok",
+    "model": "deepseek-r1:14b",
+    "num_agents": 30,
+    "max_tokens": 2048,
+    "completion_rate": 1.0,
+    "format_rate": 0.8333,
+    "correctness_rate": 0.6333,
+    "truncated_rate": 0.1667,
+    "empty_response_rate": 0.1667,
+    "off_by_one_count": 6,
+    "mean_thinking_chars": 2386.8,
+    "achieved_concurrency": 2.05,
+    "total_time_s": 400.67,
+    "co_resident": [],
+    "wrong_answers": [
+      {
+        "agent": 10,
+        "got": 29,
+        "want": 31
+      },
+      {
+        "agent": 14,
+        "got": 43,
+        "want": 47
+      },
+      {
+        "agent": 21,
+        "got": 73,
+        "want": 79
+      },
+      {
+        "agent": 25,
+        "got": 97,
+        "want": 101
+      },
+      {
+        "agent": 26,
+        "got": 101,
+        "want": 103
+      },
+      {
+        "agent": 27,
+        "got": 103,
+        "want": 107
+      }
+    ]
+  },
+  {
+    "control": "B fixed prompt @2048tok",
+    "model": "deepseek-r1:14b",
+    "num_agents": 30,
+    "max_tokens": 2048,
+    "completion_rate": 1.0,
+    "format_rate": 1.0,
+    "correctness_rate": 0.9667,
+    "truncated_rate": 0.0,
+    "empty_response_rate": 0.0,
+    "off_by_one_count": 1,
+    "mean_thinking_chars": 1414.7,
+    "achieved_concurrency": 8.75,
+    "total_time_s": 271.3,
+    "co_resident": [],
+    "wrong_answers": [
+      {
+        "agent": 10,
+        "got": 29,
+        "want": 31
+      }
+    ]
+  },
+  {
+    "control": "C constant difficulty",
+    "model": "deepseek-r1:14b",
+    "num_agents": 5,
+    "max_tokens": 2048,
+    "completion_rate": 1.0,
+    "format_rate": 1.0,
+    "correctness_rate": 1.0,
+    "truncated_rate": 0.0,
+    "empty_response_rate": 0.0,
+    "off_by_one_count": 0,
+    "mean_thinking_chars": 970.0,
+    "achieved_concurrency": 3.81,
+    "total_time_s": 53.34,
+    "co_resident": [],
+    "wrong_answers": []
+  },
+  {
+    "control": "C constant difficulty",
+    "model": "deepseek-r1:14b",
+    "num_agents": 15,
+    "max_tokens": 2048,
+    "completion_rate": 1.0,
+    "format_rate": 1.0,
+    "correctness_rate": 1.0,
+    "truncated_rate": 0.0,
+    "empty_response_rate": 0.0,
+    "off_by_one_count": 0,
+    "mean_thinking_chars": 1224.9,
+    "achieved_concurrency": 10.66,
+    "total_time_s": 145.45,
+    "co_resident": [],
+    "wrong_answers": []
+  },
+  {
+    "control": "C constant difficulty",
+    "model": "deepseek-r1:14b",
+    "num_agents": 30,
+    "max_tokens": 2048,
+    "completion_rate": 1.0,
+    "format_rate": 1.0,
+    "correctness_rate": 1.0,
+    "truncated_rate": 0.0,
+    "empty_response_rate": 0.0,
+    "off_by_one_count": 0,
+    "mean_thinking_chars": 1361.5,
+    "achieved_concurrency": 8.77,
+    "total_time_s": 212.87,
+    "co_resident": [],
+    "wrong_answers": []
+  },
+  {
+    "control": "C constant difficulty",
+    "model": "deepseek-r1:14b",
+    "num_agents": 50,
+    "max_tokens": 2048,
+    "completion_rate": 1.0,
+    "format_rate": 1.0,
+    "correctness_rate": 0.96,
+    "truncated_rate": 0.0,
+    "empty_response_rate": 0.0,
+    "off_by_one_count": 2,
+    "mean_thinking_chars": 1352.5,
+    "achieved_concurrency": 14.18,
+    "total_time_s": 248.71,
+    "co_resident": [],
+    "wrong_answers": [
+      {
+        "agent": 8,
+        "got": 19,
+        "want": 23
+      },
+      {
+        "agent": 38,
+        "got": 19,
+        "want": 23
+      }
+    ]
+  },
+  {
+    "control": "C constant difficulty",
+    "model": "deepseek-r1:14b",
+    "num_agents": 60,
+    "max_tokens": 2048,
+    "completion_rate": 1.0,
+    "format_rate": 1.0,
+    "correctness_rate": 0.9833,
+    "truncated_rate": 0.0,
+    "empty_response_rate": 0.0,
+    "off_by_one_count": 1,
+    "mean_thinking_chars": 1447.4,
+    "achieved_concurrency": 12.06,
+    "total_time_s": 289.43,
+    "co_resident": [],
+    "wrong_answers": [
+      {
+        "agent": 38,
+        "got": 19,
+        "want": 23
+      }
+    ]
+  }
+]
