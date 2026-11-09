@@ -12,8 +12,12 @@ on every commit — no GPU, no inference server, no network.*
 **Testbed:** NVIDIA DGX Spark (Blackwell GB10, 128 GB unified memory)
 **Inference:** Ollama 0.40.15, parallel-enabled instance (`OLLAMA_NUM_PARALLEL=64`) — see Reproduction below
 
-**Project page:** https://devrubenarevalo.github.io/swarm-project/ — the paper, the
-3-minute walkthrough and the headline result on one page.
+**Project page and results dashboard:** https://devrubenarevalo.github.io/swarm-project/
+— the headline result, the figures, and the 3-minute video walkthrough on one page.
+
+**Video walkthrough (3 min):**
+[watch](https://devrubenarevalo.github.io/swarm-project/video/swarm_fidelity_demo_natural.mp4)
+· [captions](video/swarm_fidelity_demo_natural.srt)
 
 ## The finding
 
