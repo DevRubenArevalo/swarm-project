@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swarm Fidelity — Where Do Local Models Break?</title>
+<meta name="description" content="We went looking for the swarm size at which small local models break. We did not find one — our first harness reported one anyway. Four measurement artifacts, each with the negative control that catches it.">
+<meta property="og:title" content="Swarm Fidelity: Where Do Local Models Break?">
+<meta property="og:description" content="The break point was in the instrument, not the models.">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --bg:#f4f4ef; --panel:#fff; --ink:#152a2d; --ink2:#405a5d; --ink3:#5f7b7e;
+    --line:#cbdad6; --accent:#006e62; --bad:#a63d28; --dark:#102e31;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'DejaVu Sans',sans-serif;
+    --mono:ui-monospace,'SF Mono','DejaVu Sans Mono',Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1b1c; --panel:#15262a; --ink:#edf3f1; --ink2:#b4c9c7; --ink3:#8fa8a7;
+      --line:#2a4044; --accent:#4fbfa8; --bad:#e0896f; --dark:#0a1618;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1b1c; --panel:#15262a; --ink:#edf3f1; --ink2:#b4c9c7; --ink3:#8fa8a7;
+    --line:#2a4044; --accent:#4fbfa8; --bad:#e0896f; --dark:#0a1618;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+       line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 16px}
+  header{padding:72px 0 34px}
+  .eyebrow{font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+           color:var(--ink3);font-weight:650;margin:0 0 14px}
+  h1{font-size:clamp(30px,6vw,52px);line-height:1.06;letter-spacing:-.03em;
+     margin:0 0 12px;font-weight:700}
+  .sub{font-size:clamp(17px,2.6vw,22px);color:var(--ink2);margin:0 0 26px;font-weight:450}
+  .byline{font-size:15px;color:var(--ink3);margin:0}
+  .byline a{color:var(--ink2)}
+  a{color:var(--accent)}
+  .links{display:flex;flex-wrap:wrap;gap:10px;margin:26px 0 0}
+  .btn{display:inline-block;padding:10px 17px;border-radius:9px;text-decoration:none;
+       font-size:15px;font-weight:600;border:1px solid var(--line);
+       background:var(--panel);color:var(--ink)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn:hover{border-color:var(--accent)}
+  section{padding:34px 0;border-top:1px solid var(--line)}
+  h2{font-size:23px;letter-spacing:-.02em;margin:0 0 14px;font-weight:680}
+  p{margin:0 0 15px;color:var(--ink2);font-size:17px}
+  p strong,li strong{color:var(--ink);font-weight:650}
+  .hero{background:var(--dark);color:#f6fbf9;border-radius:16px;padding:28px 30px;margin:0 0 20px}
+  .hero .k{font-size:13px;letter-spacing:.12em;text-transform:uppercase;
+           color:#9dc3bd;font-weight:650;margin:0 0 10px}
+  .hero .v{font-size:clamp(38px,8vw,62px);line-height:1;font-weight:720;
+           letter-spacing:-.04em;margin:0 0 12px}
+  .hero p{color:#c6ddd9;margin:0;font-size:16px}
+  video{width:100%;display:block;border-radius:13px;border:1px solid var(--line);background:#000}
+  figcaption{font-size:14px;color:var(--ink3);margin-top:10px}
+  figure{margin:0}
+  table{border-collapse:collapse;width:100%;font-size:15px;margin:4px 0 16px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--ink3);font-size:13px;letter-spacing:.05em;text-transform:uppercase;font-weight:650}
+  td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .bad{color:var(--bad);font-weight:650}
+  .good{color:var(--accent);font-weight:650}
+  code,pre{font-family:var(--mono);font-size:14px}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+      padding:15px 17px;overflow-x:auto;margin:0 0 15px;color:var(--ink)}
+  code{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+  pre code{background:none;border:0;padding:0}
+  ol{padding-left:22px;margin:0 0 15px}
+  li{margin-bottom:9px;color:var(--ink2);font-size:17px}
+  footer{padding:34px 0 64px;border-top:1px solid var(--line);color:var(--ink3);font-size:15px}
+  footer a{color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Swarm Alignment Hackathon 2026 · Apart Research</p>
+  <h1>Swarm Fidelity: Where Do Local Models Break?</h1>
+  <p class="sub">The break point was in the instrument, not the models.</p>
+  <p class="byline">Ruben Arevalo · Independent Researcher ·
+     <a href="https://github.com/DevRubenArevalo/swarm-project">source on GitHub</a></p>
+  <div class="links">
+    <a class="btn primary" href="docs/swarm_fidelity_report.pdf">Read the paper (PDF)</a>
+    <a class="btn" href="#video">Watch the 3-minute walkthrough</a>
+    <a class="btn" href="https://github.com/DevRubenArevalo/swarm-project">Code &amp; data</a>
+  </div>
+</header>
+
+<section>
+  <h2>The finding</h2>
+  <div class="hero">
+    <p class="k">Only the token budget changed</p>
+    <p class="v">10% → 93%</p>
+    <p>qwen3.5 4B on an identical task. Same prompt, same 30-agent swarm.</p>
+  </div>
+  <p>We set out to find the swarm size at which small local models stop behaving like
+  frontier agents. We did not find one. <strong>Our first harness reported one anyway —
+  confidently, plausibly, and falsely</strong>, and characterising that is this project's
+  contribution.</p>
+  <p>The cleanest evidence is a control that changes a single variable. Holding the model,
+  the prompt, the task and the swarm size fixed, and moving only the per-agent token budget
+  from 512 to 2048:</p>
+  <table>
+    <thead><tr><th>Model</th><th>Correct @ 512 tok</th><th>Correct @ 2048 tok</th></tr></thead>
+    <tbody>
+      <tr><td>qwen3.5 4B</td><td class="n bad">0.10 [0.03, 0.26]</td><td class="n good">0.93 [0.79, 0.98]</td></tr>
+      <tr><td>qwen3.5 9B</td><td class="n bad">0.03 [0.01, 0.17]</td><td class="n good">0.87 [0.70, 0.95]</td></tr>
+      <tr><td>deepseek-r1 14B</td><td class="n bad">0.13 [0.05, 0.30]</td><td class="n good">0.63 [0.46, 0.78]</td></tr>
+    </tbody>
+  </table>
+  <p>Brackets are Wilson 95% intervals, n=30 per cell; the 4B's two intervals are disjoint.
+  Nothing about the task changed. Eighty-three points of apparent capability collapse were a
+  property of one configuration value in our own code.</p>
+</section>
+
+<section id="video">
+  <h2>Three-minute walkthrough</h2>
+  <figure>
+    <video controls preload="metadata" playsinline
+           poster="output/fig1_fidelity_curve.png"
+           src="video/swarm_fidelity_demo_natural.mp4">
+      Your browser cannot play this video.
+      <a href="video/swarm_fidelity_demo_natural.mp4">Download it instead</a>.
+    </video>
+    <figcaption>180 seconds. Every number on screen traces to a row in
+      <code>output/</code>. Captions:
+      <a href="video/swarm_fidelity_demo_natural.srt">SRT</a>.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>Four artifacts, four negative controls</h2>
+  <p>Each is plausible, invisible in normal operation, and independently sufficient to
+  produce a convincing break-point curve — and each gets <em>worse</em> on harder tasks,
+  not better.</p>
+  <ol>
+    <li><strong>Silent serialization.</strong> The server ran one request at a time, so a
+    “swarm of 60” was a queue of 60. Both standard parallelism metrics report
+    <em>perfect parallelism</em> for a fully serial queue — that blindness is algebraic, so
+    it holds for any study using them.</li>
+    <li><strong>Format-only scoring.</strong> The scorer validated response shape, not
+    content. A confidently wrong answer scored 1.0, so the sycophancy probe could not
+    detect sycophancy.</li>
+    <li><strong>Token truncation.</strong> At 512 tokens, 83–97% of agents exhausted the
+    budget inside a hidden reasoning field and returned an empty string, scored as model
+    failure rather than as no measurement at all.</li>
+    <li><strong>Difficulty confounded with swarm size.</strong> Agent <em>k</em> got a
+    subtask of difficulty proportional to <em>k</em>, so a bigger swarm was also a harder
+    task.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>Check it yourself</h2>
+  <p>Every number in the paper is re-derived from the committed raw data by one command.
+  <strong>No GPU, no inference server, no network.</strong></p>
+<pre><code>git clone https://github.com/DevRubenArevalo/swarm-project
+cd swarm-project
+pip install -r requirements.txt
+python3 -m swarm.verify</code></pre>
+<pre><code>All 42 claims verified against the committed data.</code></pre>
+  <p>It exits non-zero if any claim fails. It checks the chain from data to claim — that the
+  paper's numbers are the numbers in the files — not the inference runs themselves.</p>
+</section>
+
+<section>
+  <h2>Read the null narrowly</h2>
+  <p>Our agents never read each other's output, so no mechanism exists by which swarm size
+  <em>could</em> degrade per-agent correctness beyond resource contention, which we
+  controlled for. “No break point” means this design could not have produced one — not that
+  local-model swarms are robust. The coordination experiment this harness makes possible is
+  set out in §5 of the paper.</p>
+</section>
+
+<footer>
+  <p>Testbed: NVIDIA DGX Spark (Blackwell GB10, 128 GB unified) · Ollama 0.40.15 ·
+  qwen3.5 4B / 9B, deepseek-r1 14B (Q4_K_M)</p>
+  <p><a href="docs/swarm_fidelity_report.pdf">Paper</a> ·
+     <a href="https://github.com/DevRubenArevalo/swarm-project">Repository</a> ·
+     <a href="https://github.com/DevRubenArevalo/swarm-project/blob/main/docs/progress.md">Investigation log</a> ·
+     MIT licensed</p>
+</footer>
+
+</div>
+</body>
+</html>

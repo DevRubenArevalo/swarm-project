@@ -5,6 +5,9 @@
 **Testbed:** NVIDIA DGX Spark (Blackwell GB10, 128 GB unified memory)
 **Inference:** Ollama 0.40.15, parallel-enabled instance (`OLLAMA_NUM_PARALLEL=64`) — see Reproduction below
 
+**Project page:** https://devrubenarevalo.github.io/swarm-project/ — the paper, the
+3-minute walkthrough and the headline result on one page.
+
 ## The finding
 
 We went looking for the swarm size at which small local models stop behaving
