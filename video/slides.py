@@ -103,7 +103,7 @@ def line_chart(series, xs, *, w=1500, h=540, ylab="", xlab="", ymax=1.0,
         o.append(f'<text x="{ml}" y="{mt-26}" font-size="22" fill="{INK3}">{ylab}</text>')
     # series: 2px lines, >=8px markers, 2px surface ring
     ends = []
-    for i, (name, col, ys) in enumerate(series):
+    for i, (_name, col, ys) in enumerate(series):
         pts = " ".join(f"{x(a):.1f},{y(b):.1f}" for a, b in zip(xs, ys))
         o.append(f'<polyline points="{pts}" fill="none" stroke="{col}" '
                  f'stroke-width="3" stroke-linejoin="round"/>')
@@ -124,7 +124,7 @@ def line_chart(series, xs, *, w=1500, h=540, ylab="", xlab="", ymax=1.0,
             for e in ends:
                 e[1] -= over
         xe = x(xs[-1]) + 24
-        for y0, y1, val, name, col in ends:
+        for _y0, y1, val, name, col in ends:
             # a swatch carries identity; the text stays in ink tokens. No leader
             # line -- a stroke from the last point reads as a data spike.
             o.append(f'<rect x="{xe:.1f}" y="{y1-11:.1f}" width="20" height="4" '

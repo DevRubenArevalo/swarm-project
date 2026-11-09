@@ -20,6 +20,7 @@ import glob
 import json
 import math
 import os
+import pathlib
 import subprocess
 import sys
 
@@ -49,10 +50,16 @@ if not sys.stdout.isatty():
 MODELS = ("qwen3.5:4b", "qwen3.5:9b", "deepseek-r1:14b")
 
 
+def load_json(path: str):
+    """Read one JSON file, closing it."""
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
 def read(pattern: str) -> list[dict]:
     rows: list[dict] = []
     for path in sorted(glob.glob(os.path.join(OUT, pattern))):
-        rows.extend(json.load(open(path)))
+        rows.extend(load_json(path))
     return rows
 
 
@@ -77,7 +84,7 @@ class Check:
 def main() -> int:
     check = Check()
     controls = read("controls_*.json")
-    e1 = read("e1_*.json")
+    read("e1_*.json")
     e2 = [r for r in read("e2_*.json") if r.get("task_id") == "coordinated_output"]
     e4 = read("e4_*.json")
     repeats = read("replicate_14b_*.json")
@@ -165,7 +172,7 @@ def main() -> int:
     # Effective concurrency ceiling: reported from the corrected E1 run, which
     # is the later of the two E1 files (the earlier one predates the fix).
     e1_files = sorted(glob.glob(os.path.join(OUT, "e1_*.json")))
-    latest_e1 = json.load(open(e1_files[-1])) if e1_files else []
+    latest_e1 = load_json(e1_files[-1]) if e1_files else []
     for model, paper in (("qwen3.5:4b", 35.2), ("qwen3.5:9b", 36.5), ("deepseek-r1:14b", 9.5)):
         at60 = [r["achieved_concurrency"] for r in latest_e1
                 if r["model"] == model and r.get("num_agents") == 60]
@@ -224,11 +231,12 @@ def main() -> int:
     check("sycophancy: responses examined", 480, total, tol=0)
 
     print(f"\n{BOLD}6. Figures regenerate from this data{OFF}")
-    before = {p: open(p, "rb").read() for p in sorted(glob.glob(os.path.join(OUT, "fig*.png")))}
+    fig_paths = sorted(glob.glob(os.path.join(OUT, "fig*.png")))
+    before = {p: pathlib.Path(p).read_bytes() for p in fig_paths}
     fig = subprocess.run([sys.executable, "-m", "swarm.figures"],
                          capture_output=True, text=True, cwd=os.path.dirname(HERE))
     check("swarm.figures runs clean", 0, fig.returncode)
-    same = all(open(p, "rb").read() == b for p, b in before.items())
+    same = all(pathlib.Path(p).read_bytes() == b for p, b in before.items())
     check("regenerated figures are byte-identical", True, same)
 
     print()

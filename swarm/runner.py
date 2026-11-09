@@ -5,11 +5,10 @@ from __future__ import annotations
 import json
 import os
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from typing import Any, Callable
 
 # The benchmark server. Override with SWARM_OLLAMA_URL.
 # Default is :11435 — the parallel-enabled instance (OLLAMA_NUM_PARALLEL>1).
@@ -186,10 +185,7 @@ class SwarmRunner:
         # Serial queue -> N*s/(N*s) = 1.0.  True N-way parallel -> N.
         ok_results = [r for r in results if r.ok]
         min_lat = min((r.elapsed_s for r in ok_results), default=0.0)
-        if total_time > 0 and min_lat > 0:
-            achieved = (len(ok_results) * min_lat) / total_time
-        else:
-            achieved = 0.0
+        achieved = len(ok_results) * min_lat / total_time if total_time > 0 and min_lat > 0 else 0.0
         # Flag runs the server served one-at-a-time despite N>1 agents.
         serialized = self.num_agents > 1 and achieved < 1.5
 

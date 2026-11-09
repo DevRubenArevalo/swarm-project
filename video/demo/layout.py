@@ -1,6 +1,8 @@
 """Video-sized views of the benchmark's saved results."""
-from html import escape
+import functools
 import json
+import operator
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -14,7 +16,7 @@ def read(name):
     return json.loads((OUT / name).read_text())
 
 
-CONTROLS = sum((read(p.name) for p in sorted(OUT.glob("controls_*.json"))), [])
+CONTROLS = functools.reduce(operator.iadd, (read(p.name) for p in sorted(OUT.glob("controls_*.json"))), [])
 REPEATS = read("replicate_14b_1794112595.json")
 E4 = read("e4_1794102159.json")
 E2 = [

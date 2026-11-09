@@ -16,12 +16,12 @@ import sys
 import time
 from typing import Any
 
-from swarm.runner import SwarmRunner
-from swarm.tasks import get_task, list_tasks
-from swarm.metrics import summarize
 from swarm.charts import plot_fidelity_curve, plot_scaling_comparison
-from swarm.guard import assert_clean, residency, contention
+from swarm.guard import assert_clean, contention, residency
+from swarm.metrics import summarize
+from swarm.runner import SwarmRunner
 from swarm.scoring import score_swarm
+from swarm.tasks import get_task, list_tasks
 
 # :11435 = the parallel-enabled instance (OLLAMA_NUM_PARALLEL>1).
 # The shared :11434 runs -np 1 and serializes every swarm into a FIFO queue.
@@ -114,7 +114,7 @@ def run_experiment_e1(
 ) -> list[dict]:
     """E1: Scaling ceiling — completion rate vs. swarm size across models."""
     print(f"\n{'='*60}")
-    print(f"  E1: SCALING CEILING")
+    print("  E1: SCALING CEILING")
     print(f"  Models: {models}")
     print(f"  Swarm sizes: {swarm_sizes}")
     print(f"  Task: {task_id}")
@@ -188,10 +188,10 @@ def run_experiment_e2(
 ) -> list[dict]:
     """E2: Coordination tax — compare identity task (no coordination) vs. coordinated_output (global constraint)."""
     print(f"\n{'='*60}")
-    print(f"  E2: COORDINATION TAX")
+    print("  E2: COORDINATION TAX")
     print(f"  Models: {models}")
     print(f"  Swarm sizes: {swarm_sizes}")
-    print(f"  Comparing: identity (no coordination) vs. coordinated_output (global constraint)")
+    print("  Comparing: identity (no coordination) vs. coordinated_output (global constraint)")
     print(f"{'='*60}")
 
     _guard(models)
@@ -224,7 +224,7 @@ def run_experiment_e3(
 ) -> list[dict]:
     """E3: Drift detection — run the same task multiple times, measure consistency."""
     print(f"\n{'='*60}")
-    print(f"  E3: DRIFT DETECTION")
+    print("  E3: DRIFT DETECTION")
     print(f"  Models: {models}")
     print(f"  Swarm sizes: {swarm_sizes}")
     print(f"  Rounds: {rounds}")
@@ -236,11 +236,11 @@ def run_experiment_e3(
     for model in models:
         for n in swarm_sizes:
             round_scores = []
-            for r in range(rounds):
+            for _r in range(rounds):
                 try:
                     s = run_single(model, n, "role_adherence")
                     round_scores.append(s.get("drift_score", s["completion_rate"]))
-                except Exception as e:
+                except Exception:
                     round_scores.append(0.0)
             # Drift = variance across rounds (lower is better)
             import statistics
@@ -264,7 +264,7 @@ def run_experiment_e4(
 ) -> list[dict]:
     """E4: Sycophancy threshold — inject a 'wrong leader' and measure conformity."""
     print(f"\n{'='*60}")
-    print(f"  E4: SYCOPHANCY THRESHOLD")
+    print("  E4: SYCOPHANCY THRESHOLD")
     print(f"  Models: {models}")
     print(f"  Swarm sizes: {swarm_sizes}")
     print(f"{'='*60}")
@@ -302,7 +302,7 @@ def run_experiment_e4(
             # different wrong number scored as a success — conflating "did not
             # copy the leader" with "got it right".
             sc = score_swarm(result, "sycophancy")
-            copied = int(round(sc["sycophancy_rate"] * sc["n_agents"]))
+            copied = round(sc["sycophancy_rate"] * sc["n_agents"])
             n_correct = sc["n_correct"]
             independent_but_wrong = sc["n_agents"] - n_correct - copied
 
@@ -385,8 +385,8 @@ def main() -> None:
         ok = verify_concurrency(model=models[0], ollama_url=args.url)
         raise SystemExit(0 if ok else 1)
 
-    if args.require_concurrency:
-        if not verify_concurrency(model=models[0], ollama_url=args.url):
+    if args.require_concurrency and not verify_concurrency(
+            model=models[0], ollama_url=args.url):
             print("\n⛔ Aborting: the server serializes the swarm, so every "
                   "number below would measure queue depth, not swarm size.")
             raise SystemExit(1)

@@ -7,14 +7,20 @@
 Pipeline: synthesize narration -> measure real durations -> normalize to exactly
 180.0s -> render slides at 1920x1080 with the measured progress rail -> stitch.
 """
-import argparse, base64, csv, os, pathlib, shutil, subprocess, sys
+import argparse
+import base64
+import csv
+import os
+import pathlib
+import shutil
+import subprocess
+import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
-from narration import SLIDES                                    # noqa: E402
-from slides import (CSS, INK, INK2, INK3, LINE, S1, S2, S3, BAD, GOOD, # noqa: E402
-                    line_chart, bar_chart, legend)
+from narration import SLIDES  # noqa: E402
+from slides import BAD, CSS, GOOD, INK, INK2, INK3, LINE, S1, S2, S3, bar_chart, legend, line_chart  # noqa: E402
 
 # Scratch space for intermediate frames, WAVs and per-slide clips, and the
 # directory holding the dashboard's exported datasets. Override with

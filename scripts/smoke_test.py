@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
 Swarm smoke test: spawn N agents concurrently against Ollama.
+
+This needs a LIVE inference server and is not part of the pytest suite --
+run it by hand to sanity-check a server before a sweep. The automated tests
+live in tests/ and need no server.
 Each agent gets a unique ID and a simple task. We measure:
   - total wall time
   - per-agent latency
@@ -10,8 +14,8 @@ Each agent gets a unique ID and a simple task. We measure:
 
 import json
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 OLLAMA_URL = "http://localhost:11434"
@@ -67,7 +71,7 @@ def call_agent(agent_id: int) -> dict:
 
 def main():
     print(f"{'='*60}")
-    print(f"  SWARM SMOKE TEST")
+    print("  SWARM SMOKE TEST")
     print(f"  Ollama : {OLLAMA_URL}")
     print(f"  Model  : {MODEL}")
     print(f"  Agents : {NUM_AGENTS} (concurrent)")
@@ -104,7 +108,7 @@ def main():
     parallel_ratio = total / max_lat if max_lat > 0 else 0
 
     print(f"\n{'='*60}")
-    print(f"  RESULTS")
+    print("  RESULTS")
     print(f"  {'─'*40}")
     print(f"  Agents OK      : {ok_count}/{NUM_AGENTS}")
     print(f"  Total wall time: {total:.2f}s")

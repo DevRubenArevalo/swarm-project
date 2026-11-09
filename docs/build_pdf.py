@@ -3,7 +3,13 @@
 This is NOT the submission artifact. The submission is the Apart-template
 document at docs/swarm_fidelity_report.pdf (editable source: .docx).
 """
-import base64, mimetypes, pathlib, subprocess, sys
+import base64
+import mimetypes
+import pathlib
+import re
+import subprocess
+import sys
+
 from markdown_it import MarkdownIt
 
 ROOT = pathlib.Path(sys.argv[1] if len(sys.argv)>1 else ".").resolve()
@@ -14,12 +20,14 @@ md = MarkdownIt("commonmark").enable("table").enable("strikethrough")
 html = md.render(SRC.read_text())
 
 # Inline images so Chrome needs no file access beyond the HTML itself.
-import re
+
+
 def embed(m):
     rel = m.group(1)
     f = (SRC.parent / rel).resolve()
     if not f.exists():
-        print("  MISSING IMAGE:", rel); return m.group(0)
+        print("  MISSING IMAGE:", rel)
+        return m.group(0)
     mime = mimetypes.guess_type(f.name)[0] or "image/png"
     b64 = base64.b64encode(f.read_bytes()).decode()
     return f'src="data:{mime};base64,{b64}"'

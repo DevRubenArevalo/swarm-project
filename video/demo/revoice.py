@@ -4,17 +4,16 @@ Install kokoro-onnx, then pass a directory containing the Kokoro v1.0 int8
 model and voices. The original demo and captions supply the visual beat times.
 """
 import argparse
-from pathlib import Path
 import subprocess
 import tempfile
 import textwrap
 import wave
+from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort
-from kokoro_onnx import Kokoro
-
 from build import stamp
+from kokoro_onnx import Kokoro
 
 OUT = Path(__file__).resolve().parents[1]
 ORIGINAL = "swarm_fidelity_demo_3min"
@@ -140,7 +139,7 @@ def render(engine, voice):
     track = np.zeros(180 * RATE, dtype=np.float32)
     captions = []
 
-    for (cue, phrases), start, end in zip(BEATS, edges, edges[1:]):
+    for (_cue, phrases), start, end in zip(BEATS, edges, edges[1:]):
         start_at = round((start + .10) * RATE)
         end_at = round((end - (.9 if end == 180.0 else .26)) * RATE)
         budget = (end_at - start_at) / RATE
@@ -165,7 +164,7 @@ def render(engine, voice):
             gaps = [gap + extra for gap in gaps]
 
         cursor = start_at
-        for text, part, pause in zip(phrases, parts, gaps + [0]):
+        for text, part, pause in zip(phrases, parts, [*gaps, 0]):
             stop = cursor + len(part)
             track[cursor:stop] = part
             wrapped = textwrap.fill(text, width=49)

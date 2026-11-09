@@ -1,0 +1,81 @@
+[project]
+name = "swarm-fidelity"
+version = "1.0.0"
+description = "Where do local-model swarms break? Four measurement artifacts and the negative controls that catch them."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.12"
+authors = [{ name = "Ruben Arevalo" }]
+keywords = ["llm", "multi-agent", "benchmarking", "measurement-validity", "ollama"]
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "matplotlib>=3.8",
+  "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+# Only needed to re-render the presentation video from source.
+video = [
+  "kokoro-onnx>=0.4",
+  "onnxruntime>=1.17",
+]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.6",
+]
+
+[project.urls]
+Homepage = "https://devrubenarevalo.github.io/swarm-project/"
+Repository = "https://github.com/DevRubenArevalo/swarm-project"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["swarm"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers --strict-config"
+filterwarnings = ["error::DeprecationWarning:swarm.*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# Generated and vendored-ish trees: the video renderers are presentation code,
+# not part of the measurement harness under test.
+extend-exclude = ["output", "video/demo/__pycache__"]
+
+[tool.ruff.lint]
+select = [
+  "E", "W",    # pycodestyle
+  "F",         # pyflakes
+  "I",         # import sorting
+  "B",         # bugbear
+  "UP",        # pyupgrade
+  "C4",        # comprehensions
+  "SIM",       # simplify
+  "RUF",       # ruff-specific
+]
+ignore = [
+  "E501",      # line length is handled by the formatter, not the linter
+  "B008",      # function call in default argument: deliberate for env lookups
+  # zip() without strict=: several call sites pair a sequence with its own
+  # tail (zip(edges, edges[1:])) where unequal length is the point, so a
+  # blanket strict=True would raise at runtime.
+  "B905",
+  # Ambiguous-unicode checks. The prose in figure captions, narration and
+  # report text uses real en/em dashes, × and arrows on purpose.
+  "RUF001", "RUF002", "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests name things for readability, not for import hygiene.
+"tests/*" = ["B011"]

@@ -36,11 +36,11 @@ import json
 import os
 import re
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Callable
 
-from swarm.runner import SwarmRunner, DEFAULT_OLLAMA_URL
-from swarm.guard import residency, contention
+from swarm.guard import contention, residency
+from swarm.runner import DEFAULT_OLLAMA_URL, SwarmRunner
 from swarm.scoring import nth_prime
 
 ITEM_RE = re.compile(r"AGENT\s+(\d+)\s*\|\s*ITEM:\s*(\d+)", re.I)
@@ -195,23 +195,26 @@ def main() -> int:
                         lambda i, n: PROMPT_ORIGINAL.replace("{agent_id}", str(i))
                                                     .replace("{swarm_size}", str(n)),
                         nth_prime, tok, args.url)
-        rows.append(r); show(r)
+        rows.append(r)
+        show(r)
 
     # B: unambiguous prompt at the generous budget. Isolates prompt ambiguity.
     r = run_control("B fixed prompt @2048tok", args.model, args.n,
                     lambda i, n: PROMPT_FIXED.replace("{agent_id}", str(i))
                                              .replace("{swarm_size}", str(n)),
                     nth_prime, 2048, args.url)
-    rows.append(r); show(r)
+    rows.append(r)
+    show(r)
 
     # C: constant per-agent difficulty across swarm sizes. The decisive control.
-    print(f"\n  --- Control C: per-agent difficulty held CONSTANT (index = agent_id mod 10) ---")
+    print("\n  --- Control C: per-agent difficulty held CONSTANT (index = agent_id mod 10) ---")
     print(hdr)
     for n in [int(x) for x in args.sizes.split(",")]:
         r = run_control("C constant difficulty", args.model, n,
                         prompt_constant_difficulty,
                         lambda i: nth_prime(i % 10), 2048, args.url)
-        rows.append(r); show(r)
+        rows.append(r)
+        show(r)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     path = os.path.join(OUTPUT_DIR, f"controls_{int(time.time())}.json")

@@ -97,8 +97,13 @@ def achieved_concurrency(result: Any) -> float:
     has no queue wait, so it approximates uncontended service time.
     ~1.0 = the server serialized the swarm; ~N = true N-way concurrency.
     """
+    # `SwarmResult.achieved_concurrency` defaults to 0.0, so test for a value
+    # rather than for None: `is not None` made the fallback below unreachable
+    # for any result the runner had not already filled in. 0.0 is not a
+    # meaningful measurement anyway — a run that served nothing falls through
+    # and gets 0.0 from the guard at the end.
     got = getattr(result, "achieved_concurrency", None)
-    if got is not None:
+    if got:
         return float(got)
     ok = [r for r in result.results if r.ok]
     min_lat = min((r.elapsed_s for r in ok), default=0.0)

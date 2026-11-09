@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import os
-from typing import Any
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
@@ -75,7 +75,7 @@ def plot_scaling_comparison(data: list[dict], output_path: str) -> None:
     models = sorted(model_max.keys())
     max_sizes = [model_max[m] for m in models]
 
-    fig, ax = plt.subplots(figsize=(8, 5))
+    _fig, ax = plt.subplots(figsize=(8, 5))
     bars = ax.bar(models, max_sizes, color=plt.cm.tab10.colors[:len(models)], edgecolor="black", linewidth=0.5)
     ax.set_ylabel("Max Swarm Size (completion ≥ 80%)")
     ax.set_title("Scaling Comparison: Max Swarm Size per Model", fontsize=13, fontweight="bold")

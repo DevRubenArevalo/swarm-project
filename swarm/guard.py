@@ -29,7 +29,7 @@ def loaded_models(ollama_url: str = OLLAMA) -> list[str]:
             data = json.loads(r.read())
         return [m.get("name", "?") for m in data.get("models", [])]
     except Exception as e:
-        raise RuntimeError(f"Could not query Ollama at {ollama_url}: {e}")
+        raise RuntimeError(f"Could not query Ollama at {ollama_url}: {e}") from e
 
 
 def is_clean(loaded: list[str], allowed: list[str]) -> bool:
@@ -125,9 +125,8 @@ def contention(entries: list[str], model_under_test: str) -> list[str]:
     mb = model_base(model_under_test)
     out = []
     for e in entries:
-        if e.startswith("shared/") or model_base(e) != mb:
-            if e not in out:
-                out.append(e)
+        if (e.startswith("shared/") or model_base(e) != mb) and e not in out:
+            out.append(e)
     return out
 
 

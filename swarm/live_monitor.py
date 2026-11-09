@@ -9,10 +9,10 @@ from __future__ import annotations
 
 import json
 import os
+import os as _os
 import time
 import urllib.request
 
-import os as _os
 # The sweep log written by `swarm.experiments`. Override with SWARM_LOG.
 # Note :11434 is typically the SERIALIZED shared server (-np 1), not the
 # benchmark instance — point SWARM_OLLAMA_URL at the parallel one.

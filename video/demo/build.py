@@ -4,14 +4,14 @@ Requires ffmpeg, ffprobe, Chrome and piper-tts. Pass the Piper ONNX voice path
 with --voice. The voice's matching .onnx.json file must sit beside it.
 """
 import argparse
-from itertools import accumulate
-from pathlib import Path
 import re
 import shutil
 import subprocess
 import tempfile
 import textwrap
 import wave
+from itertools import accumulate
+from pathlib import Path
 
 from layout import page
 from scenes import SCENES

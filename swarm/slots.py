@@ -69,7 +69,7 @@ fi
 
 
 def fetch() -> dict:
-    out = subprocess.run(SSH + [REMOTE], capture_output=True, text=True, timeout=40)
+    out = subprocess.run([*SSH, REMOTE], capture_output=True, text=True, timeout=40)
     if out.returncode != 0:
         raise RuntimeError(out.stderr.strip() or "slot probe failed")
     meta: dict = {}

@@ -1,5 +1,12 @@
 # Swarm Fidelity: Where Do Local Models Break?
 
+[![CI](https://github.com/DevRubenArevalo/swarm-project/actions/workflows/ci.yml/badge.svg)](https://github.com/DevRubenArevalo/swarm-project/actions/workflows/ci.yml)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+*CI re-derives all 42 figures quoted in the paper from the committed raw data
+on every commit — no GPU, no inference server, no network.*
+
 **Hackathon:** AI Alignment Foundation — Swarm Alignment 2026
 **Date:** November 7–8, 2026
 **Testbed:** NVIDIA DGX Spark (Blackwell GB10, 128 GB unified memory)
@@ -28,6 +35,11 @@ Brackets are Wilson 95% intervals, n=30. The two intervals are disjoint.
 
 Nothing about the task changed. 83 points of apparent capability collapse were
 a property of one configuration value in our own code.
+
+![Corrected fidelity curve: the confounded protocol produces a capability cliff; with difficulty held constant and the token budget raised, it is flat](output/fig1_fidelity_curve.png)
+
+*The same models, measured two ways. Orange is the original protocol; blue is
+the same task with the artifacts removed.*
 
 That is one of four such artifacts. Each is plausible, invisible in normal
 operation, and independently sufficient to produce a convincing break-point
@@ -71,8 +83,11 @@ command. **No GPU, no inference server, no network** — the results are in
 ```bash
 git clone https://github.com/DevRubenArevalo/swarm-project
 cd swarm-project
-pip install -r requirements.txt
-python3 -m swarm.verify
+pip install -e ".[dev]"
+
+python3 -m swarm.verify     # 42 research claims, recomputed from output/*.json
+pytest                      # 88 unit tests, no server needed
+ruff check .                # lint
 ```
 
 ```
@@ -95,28 +110,36 @@ inference server you have proven is actually parallel.
 ## Repository
 
 ```
+index.html            project page (GitHub Pages)
+pyproject.toml        deps, ruff and pytest config
+.github/workflows/    CI: lint, tests, and the claim verifier
+
 docs/swarm_fidelity_report.pdf   SUBMISSION: 7-page report on the Apart template
 docs/swarm_fidelity_report.docx  editable source for that PDF
 docs/REPORT.md        long-form report (fuller than the 7-page PDF)
 docs/progress.md      full investigation log, including the retractions
 docs/VIDEO_SCRIPT.md  3-minute video script + shot list
+docs/build_pdf.py     renders REPORT.md to a reading PDF
 
 swarm/runner.py       concurrent runner; achieved_concurrency, done_reason, timings
 swarm/scoring.py      content-level scoring + self-test
+swarm/metrics.py      parallelism metrics, including the two that cannot see a queue
 swarm/controls.py     the three artifact controls
 swarm/guard.py        instance-labelled GPU residency recording
 swarm/slots.py        live llama.cpp slot inspector
 swarm/experiments.py  E1-E4 orchestration
 swarm/figures.py      report figures
-swarm/verify.py       re-derives every claim in the report from output/ (no GPU)
 swarm/tasks.py        the 4-task suite
+swarm/verify.py       re-derives every claim in the report from output/ (no GPU)
+
+tests/                pytest suite; needs no server
+scripts/smoke_test.py manual smoke check against a live Ollama server
 
 output/               results (JSON) and the 3 report figures (PNG)
 output/retracted/     pre-correction figures, kept as evidence only
 
 video/                3-minute presentation video (180.00s) + captions
-video/build.py        slide renderer and ffmpeg assembly
-video/demo/           revised cut: layout, scenes, neural narration
+video/demo/           the renderer that produced the final cut
 ```
 
 ## Running it

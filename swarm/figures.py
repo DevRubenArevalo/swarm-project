@@ -20,6 +20,7 @@ import json
 import os
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
@@ -70,7 +71,8 @@ def load_latest(pattern: str) -> list[dict]:
     fs = sorted(glob.glob(os.path.join(OUTPUT_DIR, pattern)))
     if not fs:
         return []
-    d = json.load(open(fs[-1]))
+    with open(fs[-1], encoding="utf-8") as fh:
+        d = json.load(fh)
     return d if isinstance(d, list) else d.get("data", [])
 
 
@@ -87,12 +89,14 @@ def load_all_controls() -> list[dict]:
     rows = []
     for f in sorted(glob.glob(os.path.join(OUTPUT_DIR, "controls_*.json"))):
         try:
-            rows.extend(json.load(open(f)))
+            with open(f, encoding="utf-8") as fh:
+                rows.extend(json.load(fh))
         except (json.JSONDecodeError, OSError):
             continue
     for f in sorted(glob.glob(os.path.join(OUTPUT_DIR, "replicate_14b_*.json"))):
         try:
-            rows.extend(json.load(open(f)))
+            with open(f, encoding="utf-8") as fh:
+                rows.extend(json.load(fh))
         except (json.JSONDecodeError, OSError):
             continue
 
@@ -201,8 +205,8 @@ def fig_fidelity(controls, e2, path):
              "Remove both and the collapse disappears.",
              color=INK_2, fontsize=9.5, ha="left", va="top")
 
-    h, l = axes[0].get_legend_handles_labels()
-    leg = fig.legend(h, l, loc="lower left", bbox_to_anchor=(0.02, 0.0),
+    handles, labels = axes[0].get_legend_handles_labels()
+    leg = fig.legend(handles, labels, loc="lower left", bbox_to_anchor=(0.02, 0.0),
                      ncol=2, frameon=False, fontsize=9.5)
     for t in leg.get_texts():
         t.set_color(INK_2)
@@ -264,8 +268,8 @@ def fig_truncation(controls, path):
              "hidden\nreasoning before answering; at 512 tokens most never reach an answer and score as failures.",
              color=INK_2, fontsize=9.5, ha="left", va="top")
 
-    h, l = ax1.get_legend_handles_labels()
-    leg = fig.legend(h, l, loc="lower left", bbox_to_anchor=(0.02, 0.0),
+    handles, labels = ax1.get_legend_handles_labels()
+    leg = fig.legend(handles, labels, loc="lower left", bbox_to_anchor=(0.02, 0.0),
                      ncol=2, frameon=False, fontsize=9.5)
     for t in leg.get_texts():
         t.set_color(INK_2)
